@@ -1,0 +1,210 @@
+<!DOCTYPE html><html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiyaSyntax – Generator Nama China</title>
+<style>
+:root {
+  --bg: #020617;
+  --panel: #020617;
+  --border: #1e293b;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --accent: #38bdf8;
+}
+* {box-sizing: border-box; font-family: Inter, system-ui, sans-serif;}
+body {margin:0; background: var(--bg); color: var(--text); min-height:100vh; display:flex; justify-content:center; padding:24px;}
+.app {width:100%; max-width:900px; display:grid; gap:24px;}
+header {display:flex; justify-content:space-between; align-items:center;}
+.brand {display:flex; align-items:center; gap:10px;}
+.logo {width:38px; height:38px; border-radius:10px; background: linear-gradient(135deg,#38bdf8,#0ea5e9); display:flex; align-items:center; justify-content:center; font-weight:700; color:#020617;}
+nav {display:flex; gap:18px; font-size:14px;}
+nav a {color: var(--muted); text-decoration:none; cursor:pointer;}
+nav a.active {color: var(--text);}
+.card {background: var(--panel); border:1px solid var(--border); border-radius:18px; padding:28px;}
+#home h1 {font-size:28px; margin:0 0 6px 0;}
+#home p {color:var(--muted); margin:0 0 24px 0;}
+.input-row {display:flex; gap:12px; align-items:center;}
+.input-box {flex:1; display:flex; align-items:center; gap:10px; background:#020617; border:1px solid var(--border); border-radius:14px; padding:12px 14px;}
+.input-box span {color:var(--muted); font-size:14px;}
+.input-box input {background:none; border:none; outline:none; color:var(--text); width:100%; font-size:15px;}
+.icon-btn {width:42px; height:42px; border-radius:12px; border:1px solid var(--border); background:#020617; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center;}
+.generate {margin-top:18px; width:100%; padding:14px; border-radius:14px; border:none; cursor:pointer; font-size:15px; background: linear-gradient(135deg,#38bdf8,#0ea5e9); color:#020617; font-weight:600;}
+.result {margin-top:28px; display:none; gap:14px;}
+.bubble {display:flex; justify-content:space-between; align-items:center; background:#020617; border:1px solid var(--border); border-radius:14px; padding:14px 16px;}
+.bubble .label {color:var(--muted); font-size:13px;}
+.bubble .value {font-size:16px; font-weight:500;}
+#about h2 {margin-top:0;}
+#about p {color:var(--muted); line-height:1.7;}
+footer {text-align:center; font-size:13px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<div class="brand"><div class="logo">LS</div><strong>LiyaSyntax</strong></div>
+<nav>
+<a class="active" onclick="show('home')">Home</a>
+<a onclick="show('about')">About</a>
+</nav>
+</header>
+<section id="home" class="card">
+<h1>Generator Nama China</h1>
+<p>Masukkan nama Latin, lalu sistem akan menghasilkan nama Mandarin yang selaras secara makna dan budaya.</p>
+<div class="input-row">
+<div class="input-box">
+<span>Nama</span>
+<input id="latinName" placeholder="contoh: Liya" />
+</div>
+<button class="icon-btn" onclick="copyInput()">⧉</button>
+</div>
+<button class="generate" onclick="generate()">Generate</button>
+<div class="result" id="result">
+<div class="bubble">
+<div><div class="label">Nama Mandarin</div><div class="value" id="hanzi"></div></div>
+<button class="icon-btn" onclick="copyHanzi()">⧉</button>
+</div>
+<div class="bubble"><div><div class="label">Pinyin</div><div class="value" id="pinyin"></div></div></div>
+<div class="bubble"><div><div class="label">Arti</div><div class="value" id="arti"></div></div></div>
+<div class="bubble"><div><div class="label">Makna</div><div class="value" id="makna"></div></div></div>
+</div>
+</section>
+<section id="about" class="card" style="display:none">
+<h2>Tentang LiyaSyntax</h2>
+<p>LiyaSyntax adalah generator nama Mandarin berbasis web yang dirancang untuk memberikan referensi nama yang selaras secara makna, struktur bahasa, dan konteks budaya Tiongkok. Nama yang dihasilkan tidak bersifat resmi, melainkan sebagai referensi edukatif dan kreatif.</p>
+<p>Setiap nama disusun menggunakan marga umum serta karakter yang lazim digunakan dalam penamaan manusia, dilengkapi pinyin, arti ringkas, dan penjelasan makna yang kontekstual.</p>
+<p>Aplikasi ini tidak menggunakan API eksternal dan tidak menyimpan data pengguna.</p>
+</section>
+<footer>© 2025 LiyaSyntax</footer>
+</div>
+<script>
+let locked = false;
+const names = [
+  // 50 Nama 2 Kata
+  {hanzi:"李曜", pinyin:"Lǐ Yào", arti:"Bersinar terang", makna:"曜 (yào) melambangkan cahaya dan energi yang bersinar."},
+  {hanzi:"王澜", pinyin:"Wáng Lán", arti:"Gelombang luas", makna:"澜 (lán) menunjukkan kelapangan dan dinamika."},
+  {hanzi:"张锋", pinyin:"Zhāng Fēng", arti:"Pedang tajam", makna:"锋 (fēng) melambangkan ketajaman dan keberanian."},
+  {hanzi:"刘辰", pinyin:"Liú Chén", arti:"Fajar pagi", makna:"辰 (chén) menunjukkan awal yang cerah dan optimisme."},
+  {hanzi:"陈旭", pinyin:"Chén Xù", arti:"Matahari terbit", makna:"旭 (xù) melambangkan harapan dan energi positif."},
+  {hanzi:"赵煜", pinyin:"Zhào Yù", arti:"Cahaya gemilang", makna:"煜 (yù) menunjukkan kemuliaan dan kilau yang menonjol."},
+  {hanzi:"孙涛", pinyin:"Sūn Tāo", arti:"Gelombang besar", makna:"涛 (tāo) melambangkan kekuatan dan dinamika."},
+  {hanzi:"周凌", pinyin:"Zhōu Líng", arti:"Tinggi dan anggun", makna:"凌 (líng) menunjukkan keteguhan dan kebebasan."},
+  {hanzi:"吴辰", pinyin:"Wú Chén", arti:"Fajar yang cerah", makna:"辰 (chén) melambangkan awal yang baru dan harapan."},
+  {hanzi:"郑烨", pinyin:"Zhèng Yè", arti:"Api cemerlang", makna:"烨 (yè) melambangkan semangat dan energi yang menyala."},
+  {hanzi:"冯峻", pinyin:"Féng Jùn", arti:"Gunung tinggi", makna:"峻 (jùn) menunjukkan keteguhan dan keagungan."},
+  {hanzi:"何昊", pinyin:"Hé Hào", arti:"Langit luas", makna:"昊 (hào) melambangkan keluasan dan kebesaran."},
+  {hanzi:"吕浩", pinyin:"Lǚ Hào", arti:"Luas megah", makna:"浩 (hào) menunjukkan kekuatan dan ambisi."},
+  {hanzi:"施轩", pinyin:"Shī Xuān", arti:"Aspirasi tinggi", makna:"轩 (xuān) melambangkan semangat dan pencapaian."},
+  {hanzi:"董霖", pinyin:"Dǒng Lín", arti:"Hutan rimbun", makna:"霖 (lín) menunjukkan kesuburan dan ketenangan alam."},
+  {hanzi:"程睿", pinyin:"Chéng Ruì", arti:"Cerdas dan tajam", makna:"睿 (ruì) melambangkan kebijaksanaan dan kecerdasan."},
+  {hanzi:"袁昕", pinyin:"Yuán Xīn", arti:"Fajar baru", makna:"昕 (xīn) menunjukkan awal yang cerah dan semangat."},
+  {hanzi:"邓瑜", pinyin:"Dèng Yú", arti:"Batu mulia", makna:"瑜 (yú) melambangkan keindahan dan kesempurnaan."},
+  {hanzi:"曹峥", pinyin:"Cáo Zhēng", arti:"Gunung tinggi", makna:"峥 (zhēng) menunjukkan keagungan dan keteguhan."},
+  {hanzi:"彭宸", pinyin:"Péng Chén", arti:"Fajar dan langit", makna:"宸 (chén) melambangkan kedudukan tinggi dan kebesaran."},
+  {hanzi:"曾睿", pinyin:"Zēng Ruì", arti:"Cerdas berbakat", makna:"睿 (ruì) menunjukkan kecerdasan dan kemampuan unggul."},
+  {hanzi:"肖昊", pinyin:"Xiāo Hào", arti:"Langit luas", makna:"昊 (hào) melambangkan kebesaran dan keluasan hati."},
+  {hanzi:"郭曜", pinyin:"Guō Yào", arti:"Bersinar terang", makna:"曜 (yào) melambangkan cahaya dan energi."},
+  {hanzi:"潘朗", pinyin:"Pān Lǎng", arti:"Cerah dan terang", makna:"朗 (lǎng) menunjukkan kejernihan dan kebahagiaan."},
+  {hanzi:"任轩", pinyin:"Rèn Xuān", arti:"Aspirasi tinggi", makna:"轩 (xuān) melambangkan semangat dan pencapaian."},
+  {hanzi:"范霖", pinyin:"Fàn Lín", arti:"Hutan alami", makna:"霖 (lín) menunjukkan keseimbangan dan ketenangan."},
+  {hanzi:"彭峻", pinyin:"Péng Jùn", arti:"Gunung tinggi", makna:"峻 (jùn) melambangkan keteguhan dan keagungan."},
+  {hanzi:"鲁昊", pinyin:"Lǔ Hào", arti:"Langit luas", makna:"昊 (hào) menunjukkan kebesaran dan ambisi."},
+  {hanzi:"韦霖", pinyin:"Wéi Lín", arti:"Hutan rimbun", makna:"霖 (lín) menunjukkan keseimbangan dan kesuburan."},
+  {hanzi:"贾睿", pinyin:"Jiǎ Ruì", arti:"Cerdas dan tajam", makna:"睿 (ruì) melambangkan kebijaksanaan dan kecerdasan."},
+  {hanzi:"丁昕", pinyin:"Dīng Xīn", arti:"Fajar baru", makna:"昕 (xīn) menunjukkan awal cerah dan semangat."},
+  {hanzi:"邱曜", pinyin:"Qiū Yào", arti:"Bersinar terang", makna:"曜 (yào) menunjukkan cahaya dan energi positif."},
+  {hanzi:"侯宸", pinyin:"Hóu Chén", arti:"Langit dan fajar", makna:"宸 (chén) melambangkan kedudukan tinggi dan kebesaran."},
+  {hanzi:"龚峻", pinyin:"Gōng Jùn", arti:"Gunung tinggi", makna:"峻 (jùn) menunjukkan keteguhan dan ambisi."},
+  {hanzi:"史昊", pinyin:"Shǐ Hào", arti:"Langit luas", makna:"昊 (hào) melambangkan keluasan dan kebesaran."},
+  {hanzi:"陆曜", pinyin:"Lù Yào", arti:"Bersinar terang", makna:"曜 (yào) melambangkan cahaya dan energi."},
+  {hanzi:"蔡霖", pinyin:"Cài Lín", arti:"Hutan rimbun", makna:"霖 (lín) menunjukkan keseimbangan dan kesuburan."},
+  {hanzi:"贺峻", pinyin:"Hè Jùn", arti:"Gunung tinggi", makna:"峻 (jùn) melambangkan keagungan dan keteguhan."},
+  {hanzi:"梁昊", pinyin:"Liáng Hào", arti:"Langit luas", makna:"昊 (hào) menunjukkan keluasan dan kebesaran."},
+  {hanzi:"宋曜", pinyin:"Sòng Yào", arti:"Bersinar terang", makna:"曜 (yào) melambangkan cahaya dan energi."},
+  {hanzi:"谢霖", pinyin:"Xiè Lín", arti:"Hutan alami", makna:"霖 (lín) menunjukkan keseimbangan dan ketenangan."},
+  {hanzi:"邹睿", pinyin:"Zōu Ruì", arti:"Cerdas berbakat", makna:"睿 (ruì) menunjukkan kecerdasan dan kebijaksanaan."},
+  {hanzi:"苏昕", pinyin:"Sū Xīn", arti:"Fajar cerah", makna:"昕 (xīn) melambangkan awal yang baru dan semangat."},
+  {hanzi:"魏曜", pinyin:"Wèi Yào", arti:"Bersinar terang", makna:"曜 (yào) menunjukkan cahaya dan energi positif."},
+  {hanzi:"孔峻", pinyin:"Kǒng Jùn", arti:"Gunung tinggi", makna:"峻 (jùn) melambangkan keteguhan dan keagungan."},
+  {hanzi:"丁昊", pinyin:"Dīng Hào", arti:"Langit luas", makna:"昊 (hào) menunjukkan keluasan dan kebesaran."},
+  {hanzi:"贾霖", pinyin:"Jiǎ Lín", arti:"Hutan rimbun", makna:"霖 (lín) melambangkan keseimbangan dan ketenangan."},
+  {hanzi:"吕曜", pinyin:"Lǚ Yào", arti:"Bersinar terang", makna:"曜 (yào) menunjukkan cahaya dan energi."},
+  {hanzi:"马峻", pinyin:"Mǎ Jùn", arti:"Gunung tinggi", makna:"峻 (jùn) melambangkan keteguhan dan keagungan."},
+  {hanzi:"田昊", pinyin:"Tián Hào", arti:"Langit luas", makna:"昊 (hào) melambangkan keluasan dan kebesaran."},
+  {hanzi:"黄霖", pinyin:"Huáng Lín", arti:"Hutan rimbun", makna:"霖 (lín) menunjukkan keseimbangan dan kesuburan."},
+  {hanzi:"洪曜", pinyin:"Hóng Yào", arti:"Bersinar terang", makna:"曜 (yào) menunjukkan cahaya dan energi."},
+  {hanzi:"余峻", pinyin:"Yú Jùn", arti:"Gunung tinggi", makna:"峻 (jùn) melambangkan keagungan dan keteguhan."},
+{hanzi:"彭明轩", pinyin:"Péng Míng Xuān", arti:"Cemerlang dan tinggi", makna:"明 (míng) menunjukkan kecerdasan, 轩 (xuān) melambangkan aspirasi tinggi."},
+{hanzi:"曾俊杰", pinyin:"Zēng Jùn Jié", arti:"Hebat dan unggul", makna:"俊 (jùn) melambangkan kepintaran, 杰 (jié) menunjukkan prestasi."},
+{hanzi:"肖宇航", pinyin:"Xiāo Yǔ Háng", arti:"Langit luas dan penerbangan", makna:"宇 (yǔ) menunjukkan keluasan, 航 (háng) melambangkan petualangan."},
+{hanzi:"郭明霖", pinyin:"Guō Míng Lín", arti:"Cahaya hutan", makna:"明 (míng) melambangkan kecerdasan, 林 (lín) menunjukkan kesuburan dan keseimbangan."},
+{hanzi:"潘俊豪", pinyin:"Pān Jùn Hào", arti:"Cerdas dan megah", makna:"俊 (jùn) menunjukkan kepintaran, 浩 (hào) melambangkan kebesaran."},
+{hanzi:"任晨曦", pinyin:"Rèn Chén Xī", arti:"Fajar cerah", makna:"晨 (chén) menunjukkan awal baru, 曦 (xī) melambangkan sinar mentari."},
+{hanzi:"范浩然", pinyin:"Fàn Hào Rán", arti:"Megah dan alami", makna:"浩 (hào) melambangkan kebesaran, 然 (rán) menunjukkan alami dan tenang."},
+{hanzi:"彭宇轩", pinyin:"Péng Yǔ Xuān", arti:"Langit luas tinggi", makna:"宇 (yǔ) menunjukkan keluasan, 轩 (xuān) melambangkan aspirasi tinggi."},
+{hanzi:"鲁子轩", pinyin:"Lǔ Zǐ Xuān", arti:"Anak yang bercahaya", makna:"子 (zǐ) menunjukkan anak, 轩 (xuān) melambangkan aspirasi tinggi."},
+{hanzi:"韦浩轩", pinyin:"Wéi Hào Xuān", arti:"Megah dan tinggi", makna:"浩 (hào) menunjukkan kebesaran, 轩 (xuān) melambangkan aspirasi tinggi."},
+{hanzi:"贾思远", pinyin:"Jiǎ Sī Yuǎn", arti:"Berpikir jauh", makna:"思 (sī) menunjukkan pemikiran, 远 (yuǎn) melambangkan visi luas."},
+{hanzi:"丁晨曦", pinyin:"Dīng Chén Xī", arti:"Fajar cerah", makna:"晨 (chén) menunjukkan awal baru, 曦 (xī) melambangkan sinar mentari."},
+{hanzi:"邱宇航", pinyin:"Qiū Yǔ Háng", arti:"Langit luas penerbangan", makna:"宇 (yǔ) menunjukkan keluasan, 航 (háng) melambangkan petualangan."},
+{hanzi:"侯明杰", pinyin:"Hóu Míng Jié", arti:"Cemerlang luar biasa", makna:"明 (míng) melambangkan kecerdasan, 杰 (jié) menunjukkan prestasi."},
+{hanzi:"龚浩然", pinyin:"Gōng Hào Rán", arti:"Megah dan alami", makna:"浩 (hào) menunjukkan kebesaran, 然 (rán) melambangkan alami dan tenang."},
+{hanzi:"史子晨", pinyin:"Shǐ Zǐ Chén", arti:"Anak fajar", makna:"子 (zǐ) menunjukkan anak, 晨 (chén) melambangkan awal baru."},
+{hanzi:"陆宇泽", pinyin:"Lù Yǔ Zé", arti:"Langit luas penuh berkah", makna:"宇 (yǔ) menunjukkan keluasan, 泽 (zé) melambangkan kebaikan dan berkah."},
+{hanzi:"蔡明哲", pinyin:"Cài Míng Zhé", arti:"Cemerlang bijaksana", makna:"明 (míng) menunjukkan kecerdasan, 哲 (zhé) melambangkan kebijaksanaan."},
+{hanzi:"贺俊熙", pinyin:"Hè Jùn Xī", arti:"Cerdas dan cerah", makna:"俊 (jùn) melambangkan kepintaran, 熙 (xī) menunjukkan ceria dan terang."},
+{hanzi:"梁浩轩", pinyin:"Liáng Hào Xuān", arti:"Megah dan tinggi", makna:"浩 (hào) menunjukkan kebesaran, 轩 (xuān) melambangkan aspirasi tinggi."},
+{hanzi:"宋子涵", pinyin:"Sòng Zǐ Hán", arti:"Anak yang luas", makna:"子 (zǐ) menunjukkan anak, 涵 (hán) melambangkan kebijaksanaan dan keluasan hati."},
+{hanzi:"谢宇轩", pinyin:"Xiè Yǔ Xuān", arti:"Langit luas tinggi", makna:"宇 (yǔ) menunjukkan keluasan, 轩 (xuān) melambangkan aspirasi tinggi."},
+{hanzi:"邹浩然", pinyin:"Zōu Hào Rán", arti:"Megah dan alami", makna:"浩 (hào) melambangkan kebesaran, 然 (rán) menunjukkan ketenangan alami."},
+{hanzi:"苏子轩", pinyin:"Sū Zǐ Xuān", arti:"Anak tinggi dan bercahaya", makna:"子 (zǐ) menunjukkan anak, 轩 (xuān) melambangkan aspirasi tinggi."},
+{hanzi:"魏明轩", pinyin:"Wèi Míng Xuān", arti:"Cemerlang dan tinggi", makna:"明 (míng) menunjukkan kecerdasan, 轩 (xuān) melambangkan aspirasi tinggi."},
+{hanzi:"孔宇航", pinyin:"Kǒng Yǔ Háng", arti:"Langit luas penerbangan", makna:"宇 (yǔ) menunjukkan keluasan, 航 (háng) melambangkan petualangan."},
+{hanzi:"丁俊杰", pinyin:"Dīng Jùn Jié", arti:"Cerdas dan hebat", makna:"俊 (jùn) menunjukkan kepintaran, 杰 (jié) melambangkan prestasi."},
+{hanzi:"贾宇晨", pinyin:"Jiǎ Yǔ Chén", arti:"Langit luas fajar", makna:"宇 (yǔ) menunjukkan keluasan, 晨 (chén) melambangkan awal baru."},
+{hanzi:"吕明浩", pinyin:"Lǚ Míng Hào", arti:"Cemerlang dan megah", makna:"明 (míng) menunjukkan kecerdasan, 浩 (hào) melambangkan kebesaran."},
+{hanzi:"马子轩", pinyin:"Mǎ Zǐ Xuān", arti:"Anak yang tinggi", makna:"子 (zǐ) menunjukkan anak, 轩 (xuān) melambangkan aspirasi tinggi."},
+{hanzi:"田宇晨", pinyin:"Tián Yǔ Chén", arti:"Langit luas fajar", makna:"宇 (yǔ) menunjukkan keluasan, 晨 (chén) melambangkan awal baru."},
+{hanzi:"黄明杰", pinyin:"Huáng Míng Jié", arti:"Cemerlang luar biasa", makna:"明 (míng) menunjukkan kecerdasan, 杰 (jié) melambangkan prestasi."},
+{hanzi:"洪子晨", pinyin:"Hóng Zǐ Chén", arti:"Anak fajar", makna:"子 (zǐ) menunjukkan anak, 晨 (chén) melambangkan awal baru."},
+{hanzi:"余宇轩", pinyin:"Yú Yǔ Xuān", arti:"Langit luas tinggi", makna:"宇 (yǔ) menunjukkan keluasan, 轩 (xuān) melambangkan aspirasi tinggi."},
+{hanzi:"李浩然", pinyin:"Lǐ Hào Rán", arti:"Megah dan alami", makna:"浩 (hào) melambangkan kebesaran, 然 (rán) menunjukkan ketenangan."},
+{hanzi:"王子轩", pinyin:"Wáng Zǐ Xuān", arti:"Anak yang tinggi dan bercahaya", makna:"子 (zǐ) menunjukkan anak, 轩 (xuān) melambangkan aspirasi tinggi."},
+{hanzi:"张宇晨", pinyin:"Zhāng Yǔ Chén", arti:"Langit luas fajar", makna:"宇 (yǔ) menunjukkan keluasan, 晨 (chén) melambangkan awal baru."},
+{hanzi:"刘明轩", pinyin:"Liú Míng Xuān", arti:"Cemerlang dan tinggi", makna:"明 (míng) menunjukkan kecerdasan, 轩 (xuān) melambangkan aspirasi tinggi."},
+{hanzi:"陈子航", pinyin:"Chén Zǐ Háng", arti:"Anak penerbangan", makna:"子 (zǐ) menunjukkan anak, 航 (háng) melambangkan petualangan."},
+{hanzi:"赵浩轩", pinyin:"Zhào Hào Xuān", arti:"Megah dan tinggi", makna:"浩 (hào) melambangkan kebesaran, 轩 (xuān) menunjukkan aspirasi tinggi."},
+{hanzi:"孙宇航", pinyin:"Sūn Yǔ Háng", arti:"Langit luas penerbangan", makna:"宇 (yǔ) menunjukkan keluasan, 航 (háng) melambangkan petualangan."},
+{hanzi:"周明杰", pinyin:"Zhōu Míng Jié", arti:"Cemerlang dan hebat", makna:"明 (míng) menunjukkan kecerdasan, 杰 (jié) melambangkan prestasi."},
+{hanzi:"吴子轩", pinyin:"Wú Zǐ Xuān", arti:"Anak tinggi bercahaya", makna:"子 (zǐ) menunjukkan anak, 轩 (xuān) melambangkan aspirasi tinggi."}
+];
+function show(id){
+ document.getElementById('home').style.display=id==='home'?'block':'none';
+ document.getElementById('about').style.display=id==='about'?'block':'none';
+ document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
+ event.target.classList.add('active');
+}
+function copyInput(){
+ const v=document.getElementById('latinName').value;
+ if(v) navigator.clipboard.writeText(v);
+}
+function copyHanzi(){
+ const v=document.getElementById('hanzi').innerText;
+ if(v) navigator.clipboard.writeText(v);
+}
+function generate(){
+ const input=document.getElementById('latinName').value.trim();
+ if(!input) return;
+ if(locked) return;
+ locked=true;
+ const idx=Math.floor(Math.random()*names.length);
+ const chosen=names[idx];
+ document.getElementById('hanzi').innerText=chosen.hanzi;
+ document.getElementById('pinyin').innerText=chosen.pinyin;
+ document.getElementById('arti').innerText=chosen.arti;
+ document.getElementById('makna').innerText=chosen.makna;
+ document.getElementById('result').style.display='grid';
+}
+</script>
+</body>
+  </html>
