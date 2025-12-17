@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiyaSyntax - Generator Nama China</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+body{background:#121212;color:#e0e0e0;line-height:1.6}
+.navbar{position:fixed;top:0;width:100%;background:#1f1f1f;padding:15px 20px;display:flex;justify-content:space-between;z-index:100}
+.logo{font-weight:bold;color:#f0a500}
+.menu a{margin-left:20px;color:#e0e0e0;text-decoration:none}
+.container{max-width:700px;margin:120px auto 50px;padding:20px;text-align:center}
+h1{color:#f0a500;margin-bottom:15px}
+.description{color:#bbb;margin-bottom:25px}
+
+.input-wrap{display:flex;justify-content:center;gap:8px}
+input{padding:10px;width:60%;border-radius:5px;border:none;outline:none}
+button{padding:10px 15px;border:none;border-radius:5px;background:#f0a500;font-weight:bold;cursor:pointer}
+button:disabled{background:#555;cursor:not-allowed}
+.copy-btn{background:#333;color:#eee}
+
+.result{margin-top:30px;padding:20px;background:#1f1f1f;border-radius:10px;display:none}
+.result h2{font-size:36px;color:#f0a500}
+
+.disclaimer{margin-top:30px;font-size:13px;color:#999}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+  <div class="logo">LiyaSyntax</div>
+  <div class="menu">
+    <a href="#home">Home</a>
+    <a href="#generator">Generator</a>
+    <a href="#about">About</a>
+  </div>
+</div>
+
+<div class="container" id="home">
+  <h1>Generator Nama China</h1>
+  <p class="description">
+    Masukkan nama Anda untuk menghasilkan nama China yang dilengkapi Hanzi, Pinyin, arti, dan makna filosofis.
+  </p>
+</div>
+
+<div class="container" id="generator">
+  <div class="input-wrap">
+    <input type="text" id="userName" placeholder="Masukkan nama...">
+    <button class="copy-btn" onclick="copyInput()">Salin</button>
+  </div>
+  <br>
+  <button id="generateBtn" onclick="generate()">Generate</button>
+
+  <div class="result" id="result">
+    <h2 id="hanzi">—</h2>
+    <p id="pinyin"></p>
+    <p id="meaning"></p>
+    <p id="explanation"></p>
+    <br>
+    <button class="copy-btn" onclick="copyResult()">Salin Nama</button>
+  </div>
+
+  <p class="disclaimer">
+    Makna nama bersifat interpretatif dan mencerminkan filosofi serta harapan positif dalam budaya Tionghoa, bukan penetapan makna akademis yang mutlak.
+  </p>
+</div>
+
+<div class="container" id="about">
+  <h1>Tentang LiyaSyntax</h1>
+  <p class="description">
+    LiyaSyntax merupakan aplikasi web generator nama China yang bertujuan memberikan pengalaman edukatif dan hiburan ringan dengan tetap menghormati filosofi penamaan tradisional Tiongkok.
+  </p>
+</div>
+
+<script>
+// ===== DATA MARGA (10) =====
+const surnames = [
+ {h:"李",p:"Lǐ",m:"melambangkan kestabilan dan identitas keluarga"},
+ {h:"王",p:"Wáng",m:"melambangkan kepemimpinan dan kekuatan"},
+ {h:"陈",p:"Chén",m:"melambangkan kebijaksanaan dan tradisi"},
+ {h:"林",p:"Lín",m:"melambangkan ketenangan dan keseimbangan"},
+ {h:"张",p:"Zhāng",m:"melambangkan perkembangan dan ambisi"},
+ {h:"刘",p:"Liú",m:"melambangkan keteguhan dan kebijaksanaan"},
+ {h:"黄",p:"Huáng",m:"melambangkan kemakmuran dan kehormatan"},
+ {h:"赵",p:"Zhào",m:"melambangkan keberanian dan kepercayaan diri"},
+ {h:"吴",p:"Wú",m:"melambangkan kelembutan dan keharmonisan"},
+ {h:"周",p:"Zhōu",m:"melambangkan keseimbangan dan tanggung jawab"}
+];
+
+// ===== DATA NAMA (10) =====
+const names = [
+ {h:"欣",p:"Xīn",a:"Bahagia",m:"melambangkan kegembiraan batin dan sikap optimis dalam menjalani kehidupan"},
+ {h:"慧",p:"Huì",a:"Bijaksana",m:"menggambarkan kecerdasan berpikir serta kepekaan hati"},
+ {h:"宇",p:"Yǔ",a:"Luas",m:"mencerminkan wawasan luas, pikiran terbuka, dan cita-cita tinggi"},
+ {h:"明",p:"Míng",a:"Cerah",m:"melambangkan kejernihan pikiran dan kebijaksanaan dalam bertindak"},
+ {h:"安",p:"Ān",a:"Damai",m:"melambangkan ketenangan hidup dan kestabilan batin"},
+ {h:"悦",p:"Yuè",a:"Gembira",m:"mencerminkan sifat ceria dan membawa suasana positif"},
+ {h:"琳",p:"Lín",a:"Indah",m:"melambangkan keanggunan serta keindahan lahir dan batin"},
+ {h:"杰",p:"Jié",a:"Unggul",m:"mencerminkan bakat, prestasi, dan potensi luar biasa"},
+ {h:"婷",p:"Tíng",a:"Anggun",m:"melambangkan kelembutan sikap dan keindahan karakter"},
+ {h:"浩",p:"Hào",a:"Megah",m:"melambangkan kebesaran jiwa dan kekuatan karakter"}
+];
+
+// ===== GABUNGAN (100 KOMBINASI) =====
+let combos=[];
+for(let s of surnames){
+  for(let n of names){
+    combos.push({s,n});
+  }
+}
+
+// ===== GENERATOR =====
+function generate(){
+  const input=document.getElementById("userName");
+  if(!input.value.trim()){
+    alert("Masukkan nama terlebih dahulu");
+    return;
+  }
+
+  const pick=combos[Math.floor(Math.random()*combos.length)];
+
+  document.getElementById("hanzi").innerText = pick.s.h + pick.n.h;
+  document.getElementById("pinyin").innerText = pick.s.p + " " + pick.n.p;
+  document.getElementById("meaning").innerText = "Arti: " + pick.n.a;
+  document.getElementById("explanation").innerText =
+    `Marga ${pick.s.h} ${pick.s.m}, sedangkan nama ${pick.n.h} ${pick.n.m}.`;
+
+  document.getElementById("result").style.display="block";
+  document.getElementById("generateBtn").disabled=true;
+  input.disabled=true;
+}
+
+// ===== COPY TOOLS =====
+function copyInput(){
+  navigator.clipboard.writeText(document.getElementById("userName").value);
+  alert("Nama berhasil disalin");
+}
+
+function copyResult(){
+  const text =
+    document.getElementById("hanzi").innerText + " (" +
+    document.getElementById("pinyin").innerText + ")";
+  navigator.clipboard.writeText(text);
+  alert("Nama China berhasil disalin");
+}
+</script>
+
+</body>
+</html>
